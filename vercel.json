@@ -1,0 +1,4 @@
+{
+  "buildCommand": "node api/src/export-static.js && cd web && npm install && npm run build",
+  "outputDirectory": "web/dist"
+}
