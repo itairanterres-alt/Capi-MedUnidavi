@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MED-UNIDAVI 2027 — Print</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; font-family: 'IBM Plex Sans', sans-serif; background: #F4F6FA; color: #1A2438; }
+
+  /* Print canvas — A4 paisagem em tela */
+  .print-page {
+    width: 1280px;
+    height: 860px;
+    background: #fff;
+    margin: 24px auto;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    page-break-after: always;
+    break-after: page;
+  }
+  .print-page:last-child { page-break-after: auto; break-after: auto; }
+
+  /* Cabeçalho da página de print */
+  .pp-head {
+    flex-shrink: 0;
+    padding: 14px 24px;
+    background: #023E88;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 3px solid #00ADEF;
+  }
+  .pp-head .pp-title { font-weight: 700; font-size: 15px; letter-spacing: 0.2px; }
+  .pp-head .pp-sub   { font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 2px; }
+  .pp-head .pp-perfil {
+    padding: 4px 10px; border-radius: 100px;
+    background: rgba(255,255,255,0.18); color: #fff;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .pp-head .pp-pagina { font-size: 11px; color: rgba(255,255,255,0.55); font-weight: 600; }
+
+  /* Corpo da página = container que hospeda a screen */
+  .pp-body {
+    flex: 1; min-height: 0;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    background: #F4F6FA;
+  }
+
+  /* Capa */
+  .pp-capa {
+    flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;
+    background: linear-gradient(135deg, #023E88 0%, #00ADEF 100%);
+    color: #fff; padding: 40px;
+  }
+  .pp-capa .logo {
+    width: 120px; height: 120px; border-radius: 32px;
+    background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 64px; color: #fff; margin-bottom: 32px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+  }
+  .pp-capa h1 { font-size: 56px; margin: 0 0 12px; font-weight: 800; letter-spacing: -1px; }
+  .pp-capa h2 { font-size: 22px; margin: 0 0 32px; font-weight: 400; opacity: 0.9; max-width: 720px; text-align: center; line-height: 1.5; }
+  .pp-capa .meta {
+    display: grid; grid-template-columns: repeat(3, auto); gap: 32px;
+    padding: 20px 32px; background: rgba(0,0,0,0.18); border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.18);
+  }
+  .pp-capa .meta-item .label { font-size: 10px; opacity: 0.65; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+  .pp-capa .meta-item .value { font-size: 14px; font-weight: 700; margin-top: 4px; }
+
+  /* Sumário */
+  .pp-toc { flex: 1; padding: 32px 48px; background: #fff; }
+  .pp-toc h3 { margin: 0 0 24px; font-size: 13px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 1.2px; }
+  .pp-toc ol { padding: 0; margin: 0; list-style: none; counter-reset: tocnum; }
+  .pp-toc li {
+    counter-increment: tocnum;
+    padding: 14px 0; border-bottom: 1px solid #E5E7EB;
+    display: flex; align-items: baseline; gap: 14px;
+    font-size: 14px;
+  }
+  .pp-toc li::before {
+    content: counter(tocnum, decimal-leading-zero);
+    color: #00ADEF; font-weight: 800; font-size: 13px; min-width: 32px;
+  }
+  .pp-toc li .ttl { flex: 1; color: #1A2438; font-weight: 600; }
+  .pp-toc li .desc { color: #6B7280; font-size: 12px; flex: 2; }
+  .pp-toc li .pg { color: #6B7280; font-size: 11px; font-weight: 700; }
+
+  /* Wrapper que entrega o "isMobile=false" frame ao screen */
+  .pp-screen-host {
+    flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+  }
+
+  /* Scrollbars escondidas no print */
+  ::-webkit-scrollbar { width: 0; height: 0; }
+  .pp-screen-host * { overflow: visible !important; }
+  .pp-screen-host > div, .pp-screen-host > div > div { overflow: hidden !important; }
+  /* Permite o conteúdo da screen rolar no overflow visível para evitar corte total */
+  .pp-screen-host [data-screen-root] { overflow: hidden !important; }
+
+  /* ── Print rules ──────────────────────────────────────────── */
+  @page { size: A4 landscape; margin: 0; }
+  @media print {
+    html, body { background: #fff; }
+    .print-page {
+      width: 297mm; height: 210mm;
+      margin: 0; box-shadow: none;
+      page-break-after: always; break-after: page;
+    }
+    .print-page:last-child { page-break-after: auto; break-after: auto; }
+    /* Forçar cores impressas */
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    /* Esconder scrollbars residuais */
+    ::-webkit-scrollbar { display: none; }
+    /* Desabilitar transitions/animations */
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+
+  /* Esconder Tweaks panel se aparecer */
+  [data-tweaks-panel], .tweaks-panel { display: none !important; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="med-unidavi-components.jsx"></script>
+<script type="text/babel" src="med-unidavi-coordenacao.jsx"></script>
+<script type="text/babel" src="med-unidavi-screens.jsx"></script>
+<script type="text/babel" src="med-unidavi-iesc.jsx"></script>
+<script type="text/babel" src="med-unidavi-reflexivo.jsx"></script>
+<script type="text/babel" src="med-unidavi-ic.jsx"></script>
+<script type="text/babel" src="med-unidavi-morfofuncional.jsx"></script>
+<script type="text/babel" src="med-unidavi-perfil-aluno.jsx"></script>
+<script type="text/babel" src="med-unidavi-perfil-aluno-p2.jsx"></script>
+<script type="text/babel" src="med-unidavi-perfil-aluno-screen.jsx"></script>
+<script type="text/babel" src="med-unidavi-coordenacao-blocos.jsx"></script>
+<script type="text/babel" src="med-unidavi-questoes.jsx"></script>
+<script type="text/babel" src="med-unidavi-imagens.jsx"></script>
+<script type="text/babel" src="med-unidavi-gerador.jsx"></script>
+<script type="text/babel" src="med-unidavi-eventos.jsx"></script>
+<script type="text/babel" src="med-unidavi-vitrine.jsx"></script>
+<script type="text/babel" src="med-unidavi-pratica-clinica.jsx"></script>
+<script type="text/babel" src="med-unidavi-canal.jsx"></script>
+<script type="text/babel" src="med-unidavi-capi-chat.jsx"></script>
+
+<script type="text/babel">
+// ── Página de print: cabeçalho + corpo (com sidebar quando aplicável) ───────
+function PrintPage({ idx, total, title, subtitle, perfil, perfilCor, children, sidebar = true, currentScreen }) {
+  const corPerfil = perfilCor || '#00ADEF';
+  return (
+    <div className="print-page">
+      <div className="pp-head" style={{ background: '#023E88' }}>
+        <div style={{ flex: 1 }}>
+          <div className="pp-title">{title}</div>
+          {subtitle && <div className="pp-sub">{subtitle}</div>}
+        </div>
+        {perfil && (
+          <span className="pp-perfil" style={{ background: corPerfil, color: '#fff' }}>{perfil}</span>
+        )}
+        <span className="pp-pagina">{String(idx).padStart(2,'0')} / {String(total).padStart(2,'0')}</span>
+      </div>
+      <div className="pp-body">
+        <div className="pp-screen-host" style={{ display: 'flex', flexDirection: 'row' }}>
+          {sidebar && currentScreen && <Sidebar currentScreen={currentScreen} onNavigate={() => {}} />}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden', background: DS.bg }}>
+            {children}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Capa ────────────────────────────────────────────────────────────────────
+function Capa() {
+  const hoje = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+  return (
+    <div className="print-page">
+      <div className="pp-capa">
+        <div className="logo">M</div>
+        <h1>MED-UNIDAVI 2027</h1>
+        <h2>Protótipo do ecossistema digital do curso de Medicina · UNIDAVI</h2>
+        <div className="meta">
+          <div className="meta-item"><div className="label">Documento</div><div className="value">Caderno de Telas</div></div>
+          <div className="meta-item"><div className="label">Versão</div><div className="value">v2.6 · {hoje}</div></div>
+          <div className="meta-item"><div className="label">Status</div><div className="value">DEMO institucional</div></div>
+        </div>
+        <div style={{ marginTop: 40, fontSize: 12, opacity: 0.75, fontStyle: 'italic', maxWidth: 760, textAlign: 'center', lineHeight: 1.6 }}>
+          Material para apoio à reunião — não destinado a circulação pública.
+          Telas reproduzidas com mock data; perfis (Estudante / Coordenação / Docente) coexistem apenas no protótipo.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Sumário ─────────────────────────────────────────────────────────────────
+function Sumario({ entries }) {
+  return (
+    <div className="print-page">
+      <div className="pp-head">
+        <div style={{ flex: 1 }}>
+          <div className="pp-title">Sumário</div>
+          <div className="pp-sub">Telas reproduzidas neste caderno</div>
+        </div>
+        <span className="pp-pagina">02 / {String(entries.length + 2).padStart(2,'0')}</span>
+      </div>
+      <div className="pp-toc">
+        <h3>Telas-chave</h3>
+        <ol>
+          {entries.map((e, i) => (
+            <li key={i}>
+              <span className="ttl">{e.title}</span>
+              <span className="desc">{e.subtitle}</span>
+              <span className="pg">p. {String(i + 3).padStart(2,'0')}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  );
+}
+
+// ── Coleção de telas para o caderno ──────────────────────────────────────────
+function PrintBook() {
+  // Cada entrada vira uma página depois da capa+sumário.
+  // Todas usam isMobile=false, sidebar contextual conforme perfil.
+  const PERFIL = {
+    estudante: { label: 'ESTUDANTE', cor: '#00ADEF' },
+    coord:     { label: 'COORDENAÇÃO', cor: '#7A5CBF' },
+    docente:   { label: 'DOCENTE / TUTOR', cor: '#C4622D' },
+  };
+
+  const noop = () => {};
+  const userName = 'Maria';
+
+  const telas = [
+    {
+      title: 'Login',
+      subtitle: 'Tela de entrada · UNIDAVI',
+      perfil: '—', perfilCor: '#1A2438',
+      sidebar: false, currentScreen: null,
+      render: () => <LoginScreen onLogin={noop} />,
+    },
+    {
+      title: 'Dashboard — Estudante',
+      subtitle: 'Maria · T14 · 3ª fase · home padrão do aluno',
+      perfil: PERFIL.estudante.label, perfilCor: PERFIL.estudante.cor,
+      sidebar: true, currentScreen: 'dashboard',
+      render: () => <DashboardScreen onNavigate={noop} isMobile={false} userName={userName} theme="light" />,
+    },
+    {
+      title: 'Perfil do Aluno',
+      subtitle: 'João Melo · T14 · 5ª fase · 9 blocos · ITEM 13',
+      perfil: PERFIL.docente.label, perfilCor: PERFIL.docente.cor,
+      sidebar: true, currentScreen: 'docente',
+      render: () => <PerfilAlunoScreen isMobile={false} alunoId="joao-melo" origem="docente" onVoltar={noop} onNavigate={noop} />,
+    },
+    {
+      title: 'Painel do Tutor',
+      subtitle: 'Visão de tutorados · sparklines · tendência da turma · ITEM 14',
+      perfil: PERFIL.docente.label, perfilCor: PERFIL.docente.cor,
+      sidebar: true, currentScreen: 'docente',
+      render: () => <DocenteScreen isMobile={false} onNavigate={noop} />,
+    },
+    {
+      title: 'Coordenação',
+      subtitle: 'Filtros, busca, matriz programática 27×12, drilldown · ITEM 15',
+      perfil: PERFIL.coord.label, perfilCor: PERFIL.coord.cor,
+      sidebar: true, currentScreen: 'coordenacao',
+      render: () => <CoordenacaoScreen isMobile={false} onNavigate={noop} />,
+    },
+    {
+      title: 'Iniciação Científica',
+      subtitle: 'Hub · TC × Trilha NPCMed · governança · linhas · ITEM 16',
+      perfil: PERFIL.estudante.label, perfilCor: PERFIL.estudante.cor,
+      sidebar: true, currentScreen: 'ic',
+      render: () => <ICientificaScreen isMobile={false} />,
+    },
+    {
+      title: 'Portfólio Reflexivo',
+      subtitle: 'Dra. Uni · narrativas, EPAs e devolutivas',
+      perfil: PERFIL.estudante.label, perfilCor: PERFIL.estudante.cor,
+      sidebar: true, currentScreen: 'reflexivo',
+      render: () => <PortfolioReflexivoScreen isMobile={false} />,
+    },
+    {
+      title: 'IESC — Saúde da Família',
+      subtitle: 'Dra. Valle · território Bela Vista',
+      perfil: PERFIL.estudante.label, perfilCor: PERFIL.estudante.cor,
+      sidebar: true, currentScreen: 'iesc',
+      render: () => <IESCScreen isMobile={false} onNavigate={noop} />,
+    },
+    {
+      title: 'Morfofuncional',
+      subtitle: 'Atlas, lâminas histológicas e correlações',
+      perfil: PERFIL.estudante.label, perfilCor: PERFIL.estudante.cor,
+      sidebar: true, currentScreen: 'morfofuncional',
+      render: () => <MorfofuncionalScreen isMobile={false} />,
+    },
+    {
+      title: 'Gerador — Prof. Davi',
+      subtitle: 'Produção pedagógica: Uni-Cards, ENAMED, casos progressivos',
+      perfil: PERFIL.docente.label, perfilCor: PERFIL.docente.cor,
+      sidebar: true, currentScreen: 'gerador',
+      render: () => <GeradorScreen isMobile={false} />,
+    },
+    {
+      title: 'Meu Treino — Questões',
+      subtitle: 'Banco de questões · padrão ENAMED',
+      perfil: PERFIL.estudante.label, perfilCor: PERFIL.estudante.cor,
+      sidebar: true, currentScreen: 'questoes',
+      render: () => <QuestoesScreen isMobile={false} />,
+    },
+    {
+      title: 'Banco de Imagens',
+      subtitle: 'Lâminas, exames de imagem, achados clínicos',
+      perfil: PERFIL.estudante.label, perfilCor: PERFIL.estudante.cor,
+      sidebar: true, currentScreen: 'imagens',
+      render: () => <ImagensScreen isMobile={false} />,
+    },
+    {
+      title: 'Eventos',
+      subtitle: 'Conferências, TBL, CBL e CCBL',
+      perfil: PERFIL.estudante.label, perfilCor: PERFIL.estudante.cor,
+      sidebar: true, currentScreen: 'eventos',
+      render: () => <EventosScreen isMobile={false} />,
+    },
+    {
+      title: 'Prática Clínica',
+      subtitle: 'Capi · 3 modalidades de paciente virtual em desenvolvimento',
+      perfil: PERFIL.estudante.label, perfilCor: PERFIL.estudante.cor,
+      sidebar: true, currentScreen: 'pratica',
+      render: () => <PraticaClinicaScreen isMobile={false} onNavigate={noop} />,
+    },
+    {
+      title: 'Vitrine Institucional',
+      subtitle: 'Produção científica e indicadores externos',
+      perfil: PERFIL.coord.label, perfilCor: PERFIL.coord.cor,
+      sidebar: true, currentScreen: 'vitrine',
+      render: () => <VitrineScreen isMobile={false} />,
+    },
+  ];
+
+  const total = telas.length + 2; // capa + sumário + telas
+
+  return (
+    <>
+      <Capa />
+      <Sumario entries={telas} />
+      {telas.map((t, i) => (
+        <PrintPage key={i}
+          idx={i + 3} total={total}
+          title={t.title} subtitle={t.subtitle}
+          perfil={t.perfil} perfilCor={t.perfilCor}
+          sidebar={t.sidebar} currentScreen={t.currentScreen}
+        >
+          {t.render()}
+        </PrintPage>
+      ))}
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<PrintBook />);
+
+// ── Botão de impressão manual (auto-print desativado para garantir render) ───
+(async () => {
+  // 1. Fontes carregadas
+  try {
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+  } catch (e) {}
+
+  // 2. Aguarda o React montar TODAS as páginas
+  const ESPERADO = 15;
+  const tInicio = Date.now();
+  while (true) {
+    const paginas = document.querySelectorAll('.print-page').length;
+    if (paginas >= ESPERADO) break;
+    if (Date.now() - tInicio > 25000) break;
+    await new Promise(r => setTimeout(r, 200));
+  }
+
+  // 3. Aguarda imagens
+  const imgs = Array.from(document.images);
+  await Promise.all(imgs.map(img => {
+    if (img.complete) return Promise.resolve();
+    return new Promise(res => {
+      img.addEventListener('load', res, { once: true });
+      img.addEventListener('error', res, { once: true });
+      setTimeout(res, 4000);
+    });
+  }));
+
+  // 4. Pintura confirmada
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  await new Promise(r => setTimeout(r, 800));
+
+  // 5. Mostra botão de impressão
+  const btn = document.createElement('button');
+  btn.textContent = '🖨  Imprimir / Salvar como PDF';
+  Object.assign(btn.style, {
+    position: 'fixed', bottom: '24px', right: '24px', zIndex: '99999',
+    padding: '14px 22px', borderRadius: '10px', border: 'none',
+    background: '#023E88', color: '#fff',
+    fontFamily: 'IBM Plex Sans, sans-serif', fontWeight: '700', fontSize: '14px',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.25)', cursor: 'pointer',
+    letterSpacing: '0.2px',
+  });
+  btn.addEventListener('click', () => window.print());
+  // Esconder durante o print
+  const styleHide = document.createElement('style');
+  styleHide.textContent = '@media print { #__print-btn { display: none !important; } }';
+  document.head.appendChild(styleHide);
+  btn.id = '__print-btn';
+  document.body.appendChild(btn);
+
+  // Dica visual no topo
+  const dica = document.createElement('div');
+  dica.textContent = '✓ Caderno renderizado · clique no botão azul (canto inferior direito) ou pressione Cmd/Ctrl+P';
+  Object.assign(dica.style, {
+    position: 'fixed', top: '12px', left: '50%', transform: 'translateX(-50%)',
+    zIndex: '99999', padding: '10px 18px', borderRadius: '100px',
+    background: '#2A8A5C', color: '#fff',
+    fontFamily: 'IBM Plex Sans, sans-serif', fontWeight: '600', fontSize: '12px',
+    boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+  });
+  const styleHide2 = document.createElement('style');
+  styleHide2.textContent = '@media print { #__print-dica { display: none !important; } }';
+  document.head.appendChild(styleHide2);
+  dica.id = '__print-dica';
+  document.body.appendChild(dica);
+})();
+</script>
+</body>
+</html>

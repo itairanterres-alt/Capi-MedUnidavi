@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>MED-UNIDAVI 2027 — PPTX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; font-family: 'IBM Plex Sans', sans-serif; background: #fff; }
+  ::-webkit-scrollbar { width: 0px; height: 0px; }
+
+  /* Fixed slide stage 1920x1080 */
+  .slide-stage {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    background: #F5F7FA;
+    position: relative;
+  }
+
+  /* Slide footer caption */
+  .slide-caption {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 48px;
+    background: #023E88;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    z-index: 10;
+  }
+  .slide-caption .left { display: flex; align-items: center; gap: 12px; }
+  .slide-caption .num {
+    background: rgba(255,255,255,0.18); padding: 3px 10px; border-radius: 4px;
+    font-weight: 700; font-size: 11px; letter-spacing: 0.5px;
+  }
+  .slide-caption .title { font-weight: 700; }
+  .slide-caption .sub { font-weight: 400; opacity: 0.85; font-size: 12.5px; }
+  .slide-caption .right { font-size: 11.5px; opacity: 0.75; letter-spacing: 0.6px; }
+
+  /* App container fits 1920x1032 (1080 - caption 48) */
+  .app-canvas {
+    position: absolute;
+    inset: 0;
+    bottom: 48px;
+    overflow: hidden;
+  }
+  .app-canvas .desktop-frame-host {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- Same JSX modules as the main file -->
+<script type="text/babel" src="med-unidavi-components.jsx"></script>
+<script type="text/babel" src="med-unidavi-coordenacao.jsx"></script>
+<script type="text/babel" src="med-unidavi-screens.jsx"></script>
+<script type="text/babel" src="med-unidavi-iesc.jsx"></script>
+<script type="text/babel" src="med-unidavi-reflexivo.jsx"></script>
+<script type="text/babel" src="med-unidavi-ic.jsx"></script>
+<script type="text/babel" src="med-unidavi-morfofuncional.jsx"></script>
+<script type="text/babel" src="med-unidavi-perfil-aluno.jsx"></script>
+<script type="text/babel" src="med-unidavi-perfil-aluno-p2.jsx"></script>
+<script type="text/babel" src="med-unidavi-perfil-aluno-screen.jsx"></script>
+<script type="text/babel" src="med-unidavi-canal.jsx"></script>
+<script type="text/babel" src="med-unidavi-capi-chat.jsx"></script>
+<script type="text/babel" src="med-unidavi-coordenacao-blocos.jsx"></script>
+<script type="text/babel" src="med-unidavi-questoes.jsx"></script>
+<script type="text/babel" src="med-unidavi-imagens.jsx"></script>
+<script type="text/babel" src="med-unidavi-gerador.jsx"></script>
+<script type="text/babel" src="med-unidavi-eventos.jsx"></script>
+<script type="text/babel" src="med-unidavi-vitrine.jsx"></script>
+<script type="text/babel" src="med-unidavi-pratica-clinica.jsx"></script>
+
+<script type="text/babel">
+// ─── PPTX-only single-frame app instance ─────────────────────────────────────
+// Reuses all screens from the main prototype, but no DesktopFrame chrome,
+// no top demo nav, no Tweaks. Just a fullscreen canvas with the current screen.
+
+function PptxApp() {
+  const [screen, setScreen] = React.useState('dashboard');
+  const [perfilOrigem, setPerfilOrigem] = React.useState('docente');
+
+  // Globals expected by some components — registered synchronously on every render
+  // (not in useEffect) so gen_pptx can call them as soon as React commits.
+  window.__abrirPerfilAluno = (origem) => {
+    setPerfilOrigem(origem || 'docente');
+    setScreen('perfil-aluno');
+  };
+  window.__setScreen = setScreen;
+  window.__goToScreen = (id, origem) => {
+    if (origem) setPerfilOrigem(origem);
+    setScreen(id);
+  };
+
+  const userName = 'Maria';
+  const isMobile = false;
+  const theme = 'light';
+
+  const renderScreen = () => {
+    if (typeof screen === 'string' && screen.startsWith('coord-')) {
+      return <CoordenacaoScreen isMobile={isMobile} subRoute={screen} onNavigate={setScreen} />;
+    }
+    if (typeof screen === 'string' && screen.startsWith('doc-')) {
+      return <DocenteScreen isMobile={isMobile} subRoute={screen} onNavigate={setScreen} />;
+    }
+    switch (screen) {
+      case 'login':        return <LoginAppInstance theme={theme} onLogin={() => setScreen('dashboard')} />;
+      case 'dashboard':    return <DashboardScreen onNavigate={setScreen} isMobile={isMobile} userName={userName} theme={theme} />;
+      case 'biblioteca':   return <BibliotecaScreen isMobile={isMobile} />;
+      case 'unicards':     return <UniCardsScreen onNavigate={setScreen} isMobile={isMobile} />;
+      case 'ppc':          return <PPCScreen isMobile={isMobile} />;
+      case 'iesc':         return <IESCScreen isMobile={isMobile} onNavigate={setScreen} />;
+      case 'morfofuncional': return <MorfofuncionalScreen isMobile={isMobile} />;
+      case 'questoes':     return <QuestoesScreen isMobile={isMobile} />;
+      case 'imagens':      return <ImagensScreen isMobile={isMobile} onNavigate={setScreen} />;
+      case 'gerador':      return <GeradorScreen isMobile={isMobile} />;
+      case 'eventos':      return <EventosScreen isMobile={isMobile} />;
+      case 'progresso':    return <TesteProgressoScreen isMobile={isMobile} />;
+      case 'pratica':      return <PraticaClinicaScreen isMobile={isMobile} onNavigate={setScreen} />;
+      case 'reflexivo':    return <PortfolioReflexivoScreen isMobile={isMobile} />;
+      case 'ic':           return <ICientificaScreen isMobile={isMobile} onNavigate={setScreen} />;
+      case 'vitrine':      return <VitrineScreen isMobile={isMobile} />;
+      case 'coordenacao':  return <CoordenacaoScreen isMobile={isMobile} onNavigate={setScreen} />;
+      case 'docente':      return <DocenteScreen isMobile={isMobile} onNavigate={setScreen} />;
+      case 'perfil-aluno': return <PerfilAlunoScreen isMobile={isMobile} alunoId="joao-melo" origem={perfilOrigem} onVoltar={() => setScreen(perfilOrigem || 'docente')} onNavigate={setScreen} />;
+      default:             return <DashboardScreen onNavigate={setScreen} isMobile={isMobile} userName={userName} theme={theme} />;
+    }
+  };
+
+  // Dashboard / Login não usam Sidebar; outras telas sim
+  const showSidebar = screen !== 'login';
+
+  return (
+    <div style={{ display: 'flex', height: '100%', width: '100%', overflow: 'hidden', fontFamily: 'IBM Plex Sans, sans-serif', background: '#F5F7FA' }}>
+      {showSidebar && screen !== 'login' && <Sidebar currentScreen={screen} onNavigate={setScreen} />}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {renderScreen()}
+      </div>
+    </div>
+  );
+}
+
+// ─── Slide stage shell ───────────────────────────────────────────────────────
+function SlideStage({ caption }) {
+  return (
+    <div className="slide-stage" data-screen-label={caption?.label || ''}>
+      <div className="app-canvas">
+        <PptxApp />
+      </div>
+      {caption && (
+        <div className="slide-caption">
+          <div className="left">
+            <span className="num">{caption.num}</span>
+            <span className="title">{caption.title}</span>
+            {caption.sub && <span className="sub">· {caption.sub}</span>}
+          </div>
+          <div className="right">MED-UNIDAVI 2027 · PROTÓTIPO</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Default caption — gen_pptx will set window.__caption before each capture
+function PptxRoot() {
+  const [caption, setCaption] = React.useState({
+    num: '01', title: 'Dashboard', sub: 'Maria · 3ª fase', label: 'dashboard',
+  });
+  window.__setCaption = setCaption;
+  return <SlideStage caption={caption} />;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<PptxRoot />);
+</script>
+</body>
+</html>
