@@ -66,6 +66,7 @@ function seed() {
 
     putDoc(db, 'coord', 'overview', {
       ...COORD,
+      competencias27: COMPETENCIAS_27.map(c => ({ idx: c.idx, titulo: c.titulo, eixo: c.eixo })),
       compDcn: COMP_DCN_2025,
       fases12: FASES,
       areasEixo,
