@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MED-UNIDAVI 2027 — Protótipo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; font-family: 'IBM Plex Sans', sans-serif; }
+  body { background: #0D1520; }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 10px; }
+
+  /* P1 — acessibilidade de interação */
+  a { color: #023E88; }
+  a:hover { color: #012D65; }
+  button:focus-visible, input:focus-visible, textarea:focus-visible,
+  select:focus-visible, a:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid #00ADEF;
+    outline-offset: 2px;
+  }
+
+  @keyframes capiBob {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-6px); }
+  }
+  @keyframes capiBreath {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    40%      { transform: scale(1.018) rotate(0.4deg); }
+    80%      { transform: scale(0.993) rotate(-0.3deg); }
+  }
+  @keyframes capiBubbleIn {
+    from { opacity: 0; transform: translateY(8px) scale(0.94); }
+    to   { opacity: 1; transform: none; }
+  }
+  /* ── Liquid glass (opt-in via Tweaks) — só chrome flutuante: FAB, Capi, modais ── */
+  body[data-glass="on"] .lg-fab{background:linear-gradient(135deg,rgba(2,62,136,0.82),rgba(2,62,136,0.60)) !important;-webkit-backdrop-filter:blur(14px) saturate(1.8);backdrop-filter:blur(14px) saturate(1.8);border:1px solid rgba(255,255,255,0.40) !important;box-shadow:0 8px 24px rgba(2,62,136,0.35),inset 0 1px 0 rgba(255,255,255,0.45) !important}
+  body[data-glass="on"] .lg-capi{background:rgba(255,255,255,0.55) !important;-webkit-backdrop-filter:blur(16px) saturate(1.7);backdrop-filter:blur(16px) saturate(1.7);border:1px solid rgba(255,255,255,0.65) !important;box-shadow:0 8px 24px rgba(8,16,32,0.18),inset 0 1px 0 rgba(255,255,255,0.75) !important}
+  body[data-glass="on"] .lg-panel{background:rgba(255,255,255,0.78) !important;-webkit-backdrop-filter:blur(28px) saturate(1.6);backdrop-filter:blur(28px) saturate(1.6);border:1px solid rgba(255,255,255,0.55);box-shadow:0 20px 60px rgba(8,16,32,0.28),inset 0 1px 0 rgba(255,255,255,0.8) !important}
+  body[data-glass="on"] .lg-scrim{background:rgba(8,16,32,0.28) !important;-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
+  @keyframes capiPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0,110,240,0.0); }
+    50%      { box-shadow: 0 0 0 6px rgba(0,110,240,0.12); }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="med-unidavi-components.jsx"></script>
+<script type="text/babel" src="med-unidavi-dcn27.jsx"></script>
+<script type="text/babel" src="med-unidavi-coordenacao.jsx"></script>
+<script type="text/babel" src="med-unidavi-subrotas.jsx"></script>
+<script type="text/babel" src="med-unidavi-apresentacao.jsx"></script>
+<script type="text/babel" src="med-unidavi-screens.jsx"></script>
+<script type="text/babel" src="med-unidavi-iesc.jsx"></script>
+<script type="text/babel" src="med-unidavi-reflexivo.jsx"></script>
+<script type="text/babel" src="med-unidavi-ic.jsx"></script>
+<script type="text/babel" src="med-unidavi-sam.jsx"></script>
+<script type="text/babel" src="med-unidavi-morfofuncional.jsx"></script>
+<script type="text/babel" src="med-unidavi-perfil-aluno.jsx"></script>
+<script type="text/babel" src="med-unidavi-perfil-aluno-p2.jsx"></script>
+<script type="text/babel" src="med-unidavi-bloco-enamed.jsx"></script>
+<script type="text/babel" src="med-unidavi-dashboard-enamed.jsx"></script>
+<script type="text/babel" src="med-unidavi-matriz-competencia.jsx"></script>
+<script type="text/babel" src="med-unidavi-apc-avaliacao.jsx"></script>
+<script type="text/babel" src="med-unidavi-apc-formulario.jsx"></script>
+<script type="text/babel" src="med-unidavi-hub-spuc.jsx"></script>
+<script type="text/babel" src="med-unidavi-cobertura-banco.jsx"></script>
+<script type="text/babel" src="med-unidavi-trilhas-habilidade.jsx"></script>
+<script type="text/babel" src="med-unidavi-capi-pilulas.jsx"></script>
+<script type="text/babel" src="med-unidavi-simulado-autoaplicado.jsx"></script>
+<script type="text/babel" src="med-unidavi-missao-semana.jsx"></script>
+<script type="text/babel" src="med-unidavi-anotacoes.jsx"></script>
+<script type="text/babel" src="med-unidavi-forum.jsx"></script>
+<script type="text/babel" src="med-unidavi-perfil-aluno-screen.jsx"></script>
+<script type="text/babel" src="med-unidavi-canal.jsx"></script>
+<script type="text/babel" src="med-unidavi-capi-chat.jsx"></script>
+<script type="text/babel" src="med-unidavi-coordenacao-blocos.jsx"></script>
+<script type="text/babel" src="med-unidavi-questoes.jsx"></script>
+<script type="text/babel" src="med-unidavi-imagens.jsx"></script>
+<script type="text/babel" src="med-unidavi-gerador.jsx"></script>
+<script type="text/babel" src="med-unidavi-eventos.jsx"></script>
+<script type="text/babel" src="med-unidavi-vitrine.jsx"></script>
+<script type="text/babel" src="med-unidavi-pratica-clinica.jsx"></script>
+<script type="text/babel" src="med-unidavi-capi-orientador.jsx"></script>
+<script type="text/babel" src="med-unidavi-poster-preview.jsx"></script>
+<script type="text/babel" src="med-unidavi-orientacao.jsx"></script>
+<script type="text/babel" src="med-unidavi-manual-data-inst.jsx"></script>
+<script type="text/babel" src="med-unidavi-manual-data-comp.jsx"></script>
+<script type="text/babel" src="med-unidavi-manual.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+
+<script type="text/babel">
+// ─── TWEAKS ────────────────────────────────────────────────────────────────────
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "theme": "light",
+  "userName": "Maria",
+  "faseAtual": "3ª Fase",
+  "viewMode": "split",
+  "liquidGlass": false
+}/*EDITMODE-END*/;
+
+// ─── DEVICE FRAMES ─────────────────────────────────────────────────────────────
+function DesktopFrame({ children, theme }) {
+  const dark = theme === 'dark';
+  return (
+    <div style={{
+      background: dark ? '#1A2840' : '#E8EDF8',
+      borderRadius: 16,
+      padding: '10px 10px 0',
+      boxShadow: '0 24px 60px rgba(0,0,0,0.5)',
+      overflow: 'hidden',
+      width: '100%',
+    }}>
+      {/* Browser chrome */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 6,
+        marginBottom: 8, padding: '0 2px',
+      }}>
+        {['#FF5F57','#FFBD2E','#28C840'].map(c => (
+          <div key={c} style={{ width: 10, height: 10, borderRadius: '50%', background: c }} />
+        ))}
+        <div style={{
+          flex: 1, height: 22, borderRadius: 4,
+          background: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
+          marginLeft: 4, display: 'flex', alignItems: 'center',
+          padding: '0 10px',
+        }}>
+          <span style={{ fontSize: 9, color: dark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}>
+            app.unidavi.edu.br/dashboard
+          </span>
+        </div>
+      </div>
+      {/* Screen content */}
+      <div style={{
+        borderRadius: '8px 8px 0 0',
+        overflow: 'hidden',
+        height: 620,
+        display: 'flex',
+        boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)',
+        position: 'relative',
+        transform: 'translateZ(0)', // contém elementos position:fixed (ex.: FAB, Capi-Chat) dentro do frame
+      }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function MobileFrame({ children, theme }) {
+  const dark = theme === 'dark';
+  return (
+    <div style={{
+      width: 320,
+      flexShrink: 0,
+      background: dark ? '#1A2840' : '#E0E8F2',
+      borderRadius: 40,
+      padding: '10px 6px',
+      boxShadow: '0 24px 60px rgba(0,0,0,0.5)',
+      position: 'relative',
+    }}>
+      {/* Notch */}
+      <div style={{
+        position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
+        width: 80, height: 24, background: dark ? '#0D1520' : '#111',
+        borderRadius: 12, zIndex: 10,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+      }}>
+        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#333' }} />
+        <div style={{ width: 14, height: 6, borderRadius: 3, background: '#333' }} />
+      </div>
+      {/* Status bar */}
+      <div style={{
+        height: 36, borderRadius: '30px 30px 0 0',
+        background: dark ? '#162234' : '#FFFFFF',
+        display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
+        padding: '0 20px 6px',
+      }}>
+        <span style={{ fontSize: 9, fontWeight: 700, color: dark ? '#E8EDF8' : '#1A2438' }}>9:41</span>
+        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+          {/* signal dots */}
+          {[3,4,4,4].map((h,i) => <div key={i} style={{ width: 3, height: h, background: dark ? '#E8EDF8' : '#1A2438', borderRadius: 1 }} />)}
+          {/* wifi */}
+          <div style={{ fontSize: 9, color: dark ? '#E8EDF8' : '#1A2438' }}>▲</div>
+          {/* battery */}
+          <div style={{ width: 16, height: 8, border: `1.5px solid ${dark ? '#E8EDF8' : '#1A2438'}`, borderRadius: 2, position: 'relative' }}>
+            <div style={{ width: '75%', height: '100%', background: dark ? '#E8EDF8' : '#1A2438', borderRadius: 1 }} />
+            <div style={{ position: 'absolute', right: -3, top: '50%', transform: 'translateY(-50%)', width: 2, height: 4, background: dark ? '#E8EDF8' : '#1A2438', borderRadius: 1 }} />
+          </div>
+        </div>
+      </div>
+      {/* Content */}
+      <div style={{
+        height: 560, borderRadius: 0,
+        overflow: 'hidden', position: 'relative',
+        display: 'flex', flexDirection: 'column',
+        transform: 'translateZ(0)', // contém elementos position:fixed (ex.: BottomNav) dentro do frame
+      }}>
+        {children}
+      </div>
+      {/* Home indicator */}
+      <div style={{
+        height: 28, borderRadius: '0 0 30px 30px',
+        background: dark ? '#162234' : '#FFFFFF',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <div style={{ width: 60, height: 4, background: dark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)', borderRadius: 2 }} />
+      </div>
+    </div>
+  );
+}
+
+// ─── SINGLE APP INSTANCE ────────────────────────────────────────────────────────
+function AppInstance({ isMobile, theme, userName, isDesktop }) {
+  const [screen, setScreen] = React.useState('dashboard');
+  const [perfilOrigem, setPerfilOrigem] = React.useState('docente');
+  const [perfilAluno, setPerfilAluno] = React.useState(null);
+  const [perfilBloco, setPerfilBloco] = React.useState(null);
+  if (isDesktop) window.__telaAtual = screen; // P2: NotifBell deriva o perfil da vista corrente
+  // helper exposto via window p/ cards de tutorados/drilldowns abrirem o Perfil
+  React.useEffect(() => {
+    if (isDesktop) window.__abrirPerfilAluno = (origem, aluno, bloco) => {
+      setPerfilOrigem(origem || 'docente');
+      setPerfilAluno(aluno || null);
+      setPerfilBloco(bloco || null);
+      setScreen('perfil-aluno');
+    };
+    return () => { if (isDesktop) delete window.__abrirPerfilAluno; };
+  }, [isDesktop]);
+
+  // Expose setter globally so top nav can jump screens
+  React.useEffect(() => {
+    if (isDesktop) window.__setScreen = setScreen;
+    return () => { if (isDesktop) delete window.__setScreen; };
+  }, [isDesktop]);
+
+  const renderScreen = () => {
+    // Sub-rotas das sidebars Coordenação e Docente reusam suas dashboards no protótipo
+    if (screen === 'coord-enamed') {
+      return <DashboardENAMEDScreen isMobile={isMobile} onNavigate={setScreen} />;
+    }
+    if (screen === 'coord-comp') {
+      return <MatrizCompetenciaScreen isMobile={isMobile} onNavigate={setScreen} persona="coord" />;
+    }
+    if (screen === 'doc-matriz') {
+      return <MatrizCompetenciaScreen isMobile={isMobile} onNavigate={setScreen} persona="tutor" />;
+    }
+    if (screen === 'doc-aval') {
+      return <APCAvaliacaoScreen isMobile={isMobile} onNavigate={setScreen} />;
+    }
+    if (screen === 'doc-orientacao') {
+      return <OrientacaoTCScreen isMobile={isMobile} onNavigate={setScreen} />;
+    }
+    if (screen === 'hub-spuc') {
+      return <HubSPUCScreen isMobile={isMobile} onNavigate={setScreen} />;
+    }
+    if (screen === 'manual' || screen === 'doc-manual') {
+      return <ManualScreen key={screen} isMobile={isMobile} onNavigate={setScreen} initialProfile={screen === 'doc-manual' ? 'docente' : 'estudante'} />;
+    }
+    if (screen === 'coord-banco') {
+      return <CoberturaBancoScreen isMobile={isMobile} onNavigate={setScreen} />;
+    }
+    if (screen === 'trilhas') {
+      return <TrilhasHabilidadeScreen isMobile={isMobile} onNavigate={setScreen} />;
+    }
+    if (screen === 'pilulas') {
+      return <CapiPilulasScreen isMobile={isMobile} onNavigate={setScreen} />;
+    }
+    if (screen === 'simulado') {
+      return <SimuladoAutoaplicadoScreen isMobile={isMobile} onNavigate={setScreen} />;
+    }
+    if (screen === 'missao-semana') {
+      return <MissaoSemanaScreen isMobile={isMobile} onNavigate={setScreen} />;
+    }
+    if (screen === 'notas') {
+      return <AnotacoesScreen isMobile={isMobile} onNavigate={setScreen} />;
+    }
+    if (screen === 'forum') {
+      return <ForumObjetoScreen isMobile={isMobile} onNavigate={setScreen} />;
+    }
+    if (screen === 'matriz') {
+      return <MatrizCompetenciaScreen isMobile={isMobile} onNavigate={setScreen} persona="aluno" />;
+    }
+    if (screen === 'coord-fase')   return <CoordFaseScreen isMobile={isMobile} onNavigate={setScreen} />;
+    if (screen === 'coord-aluno')  return <CoordAlunoScreen isMobile={isMobile} onNavigate={setScreen} />;
+    if (screen === 'coord-treino') return <CoordTreinoScreen isMobile={isMobile} onNavigate={setScreen} />;
+    if (screen === 'coord-relat')  return <CoordRelatScreen isMobile={isMobile} onNavigate={setScreen} />;
+    if (screen === 'coord-npcmed') return <CoordNPCMedScreen isMobile={isMobile} onNavigate={setScreen} />;
+    if (screen === 'doc-davi')     return <DocValidacaoScreen isMobile={isMobile} onNavigate={setScreen} />;
+    if (screen === 'doc-sim')      return <DocSimulacaoScreen isMobile={isMobile} onNavigate={setScreen} />;
+    if (typeof screen === 'string' && screen.startsWith('coord-')) {
+      return <CoordenacaoScreen isMobile={isMobile} subRoute={screen} onNavigate={setScreen} />;
+    }
+    if (typeof screen === 'string' && screen.startsWith('doc-')) {
+      return <DocenteScreen isMobile={isMobile} subRoute={screen} onNavigate={setScreen} />;
+    }
+    switch (screen) {
+      case 'dashboard':    return <DashboardScreen onNavigate={setScreen} isMobile={isMobile} userName={userName} theme={theme} />;
+      case 'biblioteca':   return <BibliotecaScreen isMobile={isMobile} />;
+      case 'capi-cards':   return <CapiCardsScreen onNavigate={setScreen} isMobile={isMobile} />;
+      case 'ppc':          return <PPCScreen isMobile={isMobile} />;
+      case 'iesc':         return <IESCScreen isMobile={isMobile} onNavigate={setScreen} />;
+      case 'morfofuncional': return <MorfofuncionalScreen isMobile={isMobile} />;
+      case 'questoes':     return <QuestoesScreen isMobile={isMobile} />;
+      case 'imagens':      return <ImagensScreen isMobile={isMobile} onNavigate={setScreen} />;
+      case 'gerador':      return <GeradorScreen isMobile={isMobile} />;
+      case 'eventos':      return <EventosScreen isMobile={isMobile} />;
+      case 'progresso':    return <TesteProgressoScreen isMobile={isMobile} />;
+      case 'simdavi':      return <PlaceholderScreen title="Consulta Virtual" persona={<div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:12}}><CapivaraDecorativa size={80}/><div style={{fontSize:13,color:DS.textMuted,fontWeight:600}}>Dra. Uni — Facilitadora de Simulação</div></div>} desc="Simulação de paciente virtual com feedback em 2 estágios. Dra. Uni e Dr. Capi conduzem os casos clínicos." isMobile={isMobile} />;
+      case 'pratica':      return <PraticaClinicaScreen isMobile={isMobile} onNavigate={setScreen} />;
+      case 'apcs':         return <PlaceholderScreen title="Portfólio de APCs" icon="📋" desc="Registro longitudinal de EPAs ao longo das 12 fases. Evidências, validações de preceptores e mapa de competências DCN 2025." isMobile={isMobile} />;
+      case 'reflexivo':    return <PortfolioReflexivoScreen isMobile={isMobile} />;
+      case 'ic':           return <ICientificaScreen isMobile={isMobile} onNavigate={setScreen} />;
+      case 'vitrine':      return <VitrineScreen isMobile={isMobile} />;
+      case 'coordenacao':  return <CoordenacaoScreen isMobile={isMobile} onNavigate={setScreen} />;
+      case 'docente':      return <DocenteScreen isMobile={isMobile} onNavigate={setScreen} />;
+      case 'perfil-aluno': return <PerfilAlunoScreen isMobile={isMobile} alunoRef={perfilAluno} origem={perfilOrigem} blocoInicial={perfilBloco} onVoltar={() => setScreen(perfilOrigem || 'docente')} onNavigate={setScreen} />;
+      default:             return <DashboardScreen onNavigate={setScreen} isMobile={isMobile} userName={userName} theme={theme} />;
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', height: '100%', width: '100%', overflow: 'hidden', fontFamily: 'IBM Plex Sans, sans-serif' }}>
+      {!isMobile && <Sidebar currentScreen={screen} onNavigate={setScreen} />}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {renderScreen()}
+      </div>
+      {isMobile && <BottomNav currentScreen={screen} onNavigate={setScreen} />}
+      <CanalFAB telaAtual={screen} perfil={profileFromScreen(screen)} />
+      <CapiChat telaAtual={screen} />
+    </div>
+  );
+}
+
+// ─── LOGIN APP INSTANCE ─────────────────────────────────────────────────────────
+function LoginAppInstance({ theme, onLogin }) {
+  return <LoginScreen onLogin={onLogin} />;
+}
+
+// ─── LABEL OVERLAY ──────────────────────────────────────────────────────────────
+function FrameLabel({ children, theme }) {
+  const dark = theme === 'dark';
+  return (
+    <div style={{
+      textAlign: 'center', marginBottom: 12,
+      fontSize: 11, fontWeight: 700, letterSpacing: '1px',
+      color: dark ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.5)',
+      textTransform: 'uppercase',
+    }}>{children}</div>
+  );
+}
+
+// ─── MAIN APP ───────────────────────────────────────────────────────────────────
+function App() {
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const [loggedIn, setLoggedIn] = React.useState(true); // open on Dashboard by default
+
+  const theme = 'light'; // P0 D6: toggle dark removido — telas internas não têm tema escuro implementado
+  const userName = tweaks.userName || 'Maria';
+  const viewMode = tweaks.viewMode; // 'split' | 'desktop' | 'mobile'
+
+  const dark = theme === 'dark';
+  const outerBg = dark ? '#060E1A' : '#1A2D4A';
+
+  // Liquid glass — aplica só ao chrome flutuante (FAB, Capi-Chat, modais)
+  React.useEffect(() => {
+    document.body.dataset.glass = tweaks.liquidGlass ? 'on' : 'off';
+  }, [tweaks.liquidGlass]);
+
+  // P0 D5: Esc não desloga mais — a tecla fecha drilldowns/modais nas telas internas.
+
+  return (
+    <div style={{ minHeight: '100vh', background: outerBg, fontFamily: 'IBM Plex Sans, sans-serif' }}>
+
+      {/* ── Header bar ── */}
+      <div style={{
+        padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        borderBottom: '1px solid rgba(255,255,255,0.07)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 28, height: 28, background: DS.terra, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 13, color: '#fff' }}>M</div>
+          <span style={{ fontWeight: 700, fontSize: 14, color: '#fff', letterSpacing: '-0.2px' }}>MED-UNIDAVI 2027</span>
+          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontWeight: 400, marginLeft: 4 }}>— Protótipo institucional</span>
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'flex-end' }}>
+          {[
+            { grupo: null, itens: [{ id: 'login', label: 'Login', logged: false }] },
+            { grupo: 'Aluno', itens: [
+              { id: 'dashboard', label: 'Dashboard' }, { id: 'manual', label: 'Manual' },
+              { id: 'capi-cards', label: 'Capi-Cards' },
+              { id: 'morfofuncional', label: 'Morfofuncional' }, { id: 'hub-spuc', label: 'Hub SP/UC' },
+              { id: 'trilhas', label: 'Trilhas' }, { id: 'pilulas', label: 'Capi-Pílulas' },
+              { id: 'simulado', label: 'Simulado' }, { id: 'missao-semana', label: 'Missão Semana' },
+              { id: 'notas', label: 'Anotações' }, { id: 'forum', label: 'Fórum' },
+              { id: 'questoes', label: 'Meu Treino' }, { id: 'imagens', label: 'Imagens' },
+              { id: 'eventos', label: 'Eventos' }, { id: 'iesc', label: 'IESC' },
+              { id: 'biblioteca', label: 'Biblioteca' }, { id: 'progresso', label: 'Teste de Progresso' },
+              { id: 'reflexivo', label: 'Port. Reflexivo' }, { id: 'ic', label: 'IC' },
+            ]},
+            { grupo: 'Docente', itens: [
+              { id: 'docente', label: 'Painel do Tutor' }, { id: 'doc-manual', label: 'Manual' },
+              { id: 'doc-aval', label: 'Avaliar APC' },
+              { id: 'doc-orientacao', label: 'Orientação TC' }, { id: 'gerador', label: 'Gerador Pedagógico' },
+            ]},
+            { grupo: 'Coordenação', itens: [
+              { id: 'coordenacao', label: 'Visão Geral' }, { id: 'coord-enamed', label: 'ENAMED' },
+              { id: 'coord-comp', label: 'Matriz 27×12' }, { id: 'coord-relat', label: 'Relatórios' },
+            ]},
+          ].map((g, gi) => (
+            <div key={gi} style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap', padding: '3px 6px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }}>
+              {g.grupo && <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.8px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', padding: '0 4px' }}>{g.grupo}</span>}
+              {g.itens.map(item => (
+                <button key={item.id} onClick={() => {
+                  const logged = item.logged !== false;
+                  setLoggedIn(logged);
+                  if (logged) window.__setScreen && window.__setScreen(item.id);
+                }} style={{
+                  padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.14)',
+                  background: 'transparent', color: 'rgba(255,255,255,0.6)',
+                  fontFamily: 'IBM Plex Sans, sans-serif', fontSize: 11, fontWeight: 500, cursor: 'pointer',
+                  transition: 'all 0.1s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >{item.label}</button>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Faixa DEMO — coexistência de perfis no protótipo */}
+      <div style={{
+        padding: '6px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: '#3A2A0F', borderBottom: '1px solid rgba(255,255,255,0.07)',
+        gap: 8,
+      }}>
+        <span style={{ width: 6, height: 6, borderRadius: '50%', background: DS.amber }}></span>
+        <span style={{ fontSize: 10.5, color: '#E6C66E', fontWeight: 600, letterSpacing: '0.3px', textAlign: 'center' }}>
+          DEMO — em produção, perfis (Estudante / Coordenação / Docente) serão isolados por permissão. Esta navbar superior coexiste apenas no protótipo.
+        </span>
+      </div>
+
+      {/* ── Canvas ── */}
+      <div style={{
+        padding: viewMode === 'split' ? '32px 24px' : '32px',
+        display: 'flex',
+        gap: 32,
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        flexWrap: 'wrap',
+        minHeight: 'calc(100vh - 57px)',
+      }}>
+
+        {/* Desktop view */}
+        {(viewMode === 'split' || viewMode === 'desktop') && (
+          <div style={{ flex: viewMode === 'split' ? '1 1 700px' : 'none', maxWidth: viewMode === 'split' ? 900 : 1100, minWidth: 0 }}>
+            <FrameLabel theme={theme}>Desktop — 1280px</FrameLabel>
+            <DesktopFrame theme={theme}>
+              {!loggedIn
+                ? <LoginAppInstance theme={theme} onLogin={() => setLoggedIn(true)} />
+                : <AppInstance isMobile={false} theme={theme} userName={userName} isDesktop={true} />
+              }
+            </DesktopFrame>
+          </div>
+        )}
+
+        {/* Mobile view */}
+        {(viewMode === 'split' || viewMode === 'mobile') && (
+          <div style={{ flexShrink: 0 }}>
+            <FrameLabel theme={theme}>Mobile — 380px</FrameLabel>
+            <MobileFrame theme={theme}>
+              {!loggedIn
+                ? <LoginAppInstance theme={theme} onLogin={() => setLoggedIn(true)} />
+                : <AppInstance isMobile={true} theme={theme} userName={userName} />
+              }
+            </MobileFrame>
+          </div>
+        )}
+      </div>
+
+      {/* ── Tweaks Panel ── */}
+      <TweaksPanel title="Tweaks — MED-UNIDAVI">
+        <TweakSection label="Viewport" />
+        <TweakRadio label="Vista" value={tweaks.viewMode} options={['split','desktop','mobile']} labels={['Split','Desktop','Mobile']} onChange={v => setTweak('viewMode', v)} />
+        <TweakSection label="Estilo" />
+        <TweakToggle label="Liquid glass (chrome flutuante)" value={!!tweaks.liquidGlass} onChange={v => setTweak('liquidGlass', v)} />
+        <TweakSection label="Usuário" />
+        <TweakText label="Nome" value={tweaks.userName} onChange={v => setTweak('userName', v)} placeholder="Primeiro nome" />
+      </TweaksPanel>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
